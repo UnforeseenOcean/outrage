@@ -13,9 +13,10 @@ if len(sys.argv) == 3:
     start = int(sys.argv[2])
 
 PREVIEW = True
-ratio = 1
+ratio = 3
 timings = []
 i = 0
+hit = False
 
 face_cascade = cv2.CascadeClassifier('haars/haarcascade_frontalface_default.xml')
 eye_cascade = cv2.CascadeClassifier('haars/haarcascade_eye_tree_eyeglasses.xml')
@@ -62,14 +63,23 @@ while success:
         eye_pairs = eye_pair_cascade.detectMultiScale(roi_gray)
 
         if PREVIEW:
+            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 1)
+
             for (ex,ey,ew,eh) in eyes:
                 cv2.rectangle(img,(ex+x,ey+y),(x+ex+ew,y+ey+eh),(0,255,0),2)
 
             for (ex,ey,ew,eh) in eye_pairs[0:1]:
                 cv2.rectangle(img,(ex+x,ey+y),(x+ex+ew,y+ey+eh),(0,0,255),1)
 
+
+
+    current_hit = len(eye_pairs) > 0
     if PREVIEW:
         cv2.imshow('img',img)
+        if current_hit is False and hit is True:
+            cv2.imshow('blink', img)
+
+    hit = current_hit
 
     i += 1
 
@@ -85,6 +95,7 @@ while success:
         obj['faces'].append([int(i*ratio) for i in f])
 
     timings.append(obj)
+
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
