@@ -108,11 +108,12 @@ while success:
         if prevframe is not None:
             diff = cv2.absdiff(eyeimg, prevframe)
 
-            # cv2.imshow('diff', diff)
             eye_diff_val = np.mean(diff)
 
-            if PREVIEW and eye_diff_val > 11:
-                cv2.imshow('blink', img)
+            if PREVIEW:
+                cv2.imshow('diff', diff)
+                if eye_diff_val > 11:
+                    cv2.imshow('blink', img)
 
         prevframe = gray[top_left[1]:top_left[1]+h, top_left[0]:top_left[0]+w]
 
