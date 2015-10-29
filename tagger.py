@@ -13,10 +13,11 @@ if len(sys.argv) == 3:
     start = int(sys.argv[2])
 
 PREVIEW = True
-ratio = 3
+ratio = 2
 timings = []
 i = 0
 hit = False
+preveye = None
 prevframe = None
 eyeimg = None
 eyecoords = None
@@ -54,7 +55,7 @@ while success:
     img = cv2.resize(frame,(newx, newy))
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+    faces = face_cascade.detectMultiScale(gray, 1.5, 3)
     eye_pairs = []
     eyes = []
 
@@ -75,7 +76,8 @@ while success:
             for (ex,ey,ew,eh) in eye_pairs[0:1]:
                 cv2.rectangle(img,(ex+x,ey+y),(x+ex+ew,y+ey+eh),(0,0,255),1)
 
-    if eyeimg is None and len(eye_pairs) > 0:
+    # if eyeimg is None and len(eye_pairs) > 0:
+    if len(eye_pairs) > 0:
         ex, ey, ew, eh = eye_pairs[0]
         # eyeimg = frame[(ey+y)*ratio:(ey+y)*ratio+eh*ratio, (ex+x)*ratio:(ex+x)*ratio+ew*ratio]
         eyeimg = roi_gray[ey:ey+eh, ex:ex+ew]
@@ -103,19 +105,22 @@ while success:
         top_left = min_loc
         # top_left = max_loc
         bottom_right = (top_left[0] + w, top_left[1] + h)
-        cv2.rectangle(img,top_left, bottom_right, 255, 2)
+        cv2.rectangle(img,top_left, bottom_right, 255, 1)
 
-        if prevframe is not None:
-            diff = cv2.absdiff(eyeimg, prevframe)
+        if preveye is not None:
+            if preveye.shape != eyeimg.shape:
+                preveye = prevframe[top_left[1]:top_left[1]+h, top_left[0]:top_left[0]+w]
+            diff = cv2.absdiff(eyeimg, preveye)
 
             eye_diff_val = np.mean(diff)
 
             if PREVIEW:
                 cv2.imshow('diff', diff)
-                if eye_diff_val > 11:
+                print eye_diff_val
+                if eye_diff_val > 8.5:
                     cv2.imshow('blink', img)
 
-        prevframe = gray[top_left[1]:top_left[1]+h, top_left[0]:top_left[0]+w]
+        preveye = gray[top_left[1]:top_left[1]+h, top_left[0]:top_left[0]+w]
 
     if PREVIEW:
         cv2.imshow('vid', img)
@@ -135,7 +140,7 @@ while success:
 
     timings.append(obj)
 
-    # prevframe = frame
+    prevframe = gray
 
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
