@@ -1,0 +1,133 @@
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <style type="text/css" media="all">
+    img {
+      position: absolute;
+      /* width: 900px; */
+    }
+
+    #face {
+      position:absolute;
+      z-index:999;
+      opacity: .5;
+      background-color: red;
+    }
+
+    #img-holder {
+      position: relative;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-size: cover;
+      background-color:#000;
+      background-position: center;
+    }
+    
+  </style>
+  <title></title>
+</head>
+   <body>
+   <div id="img-holder">
+     <div id="face"></div>
+     <img id="img" src="">
+   </div>
+     
+   <script>
+    var index = 0;
+    var images;
+    var ms = 800;
+
+    $.get('eyepairs.json', function(data){
+      images = data;
+      shuffle(images);
+      var tot = data.length;
+      for (var i = 0; i < data.length; i++) {
+        var img = $('<img>');
+        img.on('load', function(e){
+          tot--;
+          if (tot == 0) {
+            nextFrame();
+          }
+
+        });
+        img.attr('src', data[i].f);
+
+      }
+    })
+
+    function nextFrame() {
+      index++;
+      if (index > images.length-1) {
+        index = 0;
+        shuffle(images);
+      }
+
+      var x = images[index].face[0];
+      var y = images[index].face[1];
+      var w = images[index].face[2];
+      var h = images[index].face[3];
+
+      // x = x + (500 - x);
+      // y = y - (500 - y);
+      // var left;
+      // if (x > 0) {
+      //   left = 0 - (x - 500);
+      // } else {
+      //   left = x + (0 - x);
+      // }
+      //
+      // var top;
+      // if (y > 0) {
+      //   top = 0 - (y - 0);
+      // } else {
+      //   top = y + (0 - y);
+      // }
+
+      // var targetw = $(window).width()*.9;
+
+      var targetx = $(window).width()/2 - w/2;
+      var targety = $(window).height()/2 - h/2;
+
+      var left = targetx - x;
+      var top = targety - y;
+
+      // $('#face').css({left: x, top: y, width: w, height: h});
+      $('#img-holder').css({left: left, top: top});
+      $('#img').attr('src', images[index].f)
+
+      // $('body').css('background-position', left+'px ' + top+'px');
+      // $('body').css('background-size', 'auto');
+      // $('body').css('background-image', 'url('+images[index].f+')')
+
+      if (ms > 170) ms -= 10;
+      else ms = 900;
+      setTimeout(nextFrame, ms);
+    }
+
+    function shuffle(array) {
+      var currentIndex = array.length, temporaryValue, randomIndex ;
+
+      // While there remain elements to shuffle...
+      while (0 !== currentIndex) {
+
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+      }
+
+      return array;
+    }
+
+   </script>
+   </body>
+</html>
